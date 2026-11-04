@@ -28,9 +28,22 @@ terraform init && terraform apply
 Expensive resources (Firewall, Bastion, gateways, ASR, Defender, LB) are **off by default**; see `docs/architecture/cost-optimization.md`.
 
 ## Key documents
+- `docs/architecture/architecture-guide.md` - step-by-step architecture narrative from requirements to HLD, LLD, and implementation
 - `docs/lld/LLD-enterprise-azure-landing-zone.md` - customer-facing LLD with 8 Mermaid diagrams
 - `docs/implementation/phase-01 … phase-16` - hands-on guide
 - `docs/networking/packet-flows.md`, `docs/governance/prerequisites.md`, `docs/security/terraform-state-management.md`
 - `docs/troubleshooting/troubleshooting-guide.md`
 - `docs/interview-preparation/` (+ Terraform vs Bicep)
 - `docs/interview-preparation/study-plan.md` - 30-day plan and 20 core concepts
+
+## Architecture summary
+
+This repository implements a secure, multi-environment Azure landing zone built around a hub-spoke network and a shared platform control plane. The architecture is intentionally layered:
+
+1. Requirements and governance drive the design.
+2. A platform layer owns network connectivity, monitoring, identity, and policy.
+3. A workload layer contains app-specific resources for dev, QA, and prod.
+4. Private networking, RBAC, managed identities, private endpoints, and policy guardrails reduce exposure and simplify operations.
+5. Terraform and Azure DevOps pipeline automation make the design repeatable and auditable.
+
+For the full architecture walkthrough, see `docs/architecture/architecture-guide.md`.
