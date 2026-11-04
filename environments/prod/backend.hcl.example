@@ -1,0 +1,6 @@
+# Copy to backend.hcl (gitignored). Values come from the bootstrap-state output.
+resource_group_name  = "rg-tfstate-mgmt-cin-001"
+storage_account_name = "<state-storage-account-name>"
+container_name       = "tfstate-prod"
+key                  = "application.tfstate"
+use_azuread_auth     = true

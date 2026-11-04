@@ -1,0 +1,2 @@
+# IP plan and NSG baseline
+See LLD §12-13. Spoke subnets are derived by `cidrsubnet()` in `application/main.tf` (web /26 @0, app /26 @64, PE /27 @192). NSG rules: web allows 443 from 10.0.0.0/8, SSH from the Bastion subnet and the load balancer probe, denies the rest; app allows 8080 only from web; PE subnet allows 443/1433 only from web/app subnets. Default Azure rules (AllowVNetInBound, 65000) would otherwise allow all VNet-internal traffic - the explicit `deny-all-other-inbound` at 4000 is what enforces micro-segmentation.

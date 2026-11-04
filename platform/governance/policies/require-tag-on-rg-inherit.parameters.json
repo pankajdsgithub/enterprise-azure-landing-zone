@@ -1,0 +1,6 @@
+{
+  "tagName": {
+    "type": "String",
+    "metadata": { "displayName": "Tag name to inherit from the resource group" }
+  }
+}

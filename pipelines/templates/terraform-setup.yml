@@ -1,0 +1,11 @@
+# Shared steps: install pinned Terraform. Used by all pipelines.
+parameters:
+  - name: terraformVersion
+    type: string
+    default: '1.9.8'
+
+steps:
+  - checkout: self
+    persistCredentials: false
+  - bash: bash scripts/install-terraform.sh "${{ parameters.terraformVersion }}"
+    displayName: 'Install Terraform ${{ parameters.terraformVersion }} (checksum verified)'

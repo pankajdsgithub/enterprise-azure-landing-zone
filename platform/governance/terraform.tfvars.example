@@ -1,0 +1,4 @@
+policy_enforce = false # start in DoNotEnforce, review compliance, then switch to true
+# subscription_associations = {
+#   connectivity = { management_group = "mg-connectivity", subscription_id = "00000000-0000-0000-0000-000000000000" }
+# }

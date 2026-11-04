@@ -1,0 +1,2 @@
+alert_email_receivers = { platform-ops = "platform-ops@example.com" }
+defender_plans        = [] # e.g. ["KeyVaults", "StorageAccounts"] when you accept the cost

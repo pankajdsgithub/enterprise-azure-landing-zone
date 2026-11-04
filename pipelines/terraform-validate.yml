@@ -1,0 +1,52 @@
+# Pull-request validation: format, validate, security scan. No Azure credentials needed.
+# Configure: Repos > Branch policies on `main` > Build validation > add this pipeline (required).
+trigger: none
+pr:
+  branches:
+    include: [main]
+  paths:
+    include: [modules/*, platform/*, application/*, environments/*, pipelines/*]
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  terraformVersion: '1.9.8'
+
+stages:
+  - stage: Validate
+    jobs:
+      - job: validate
+        steps:
+          - template: templates/terraform-setup.yml
+            parameters:
+              terraformVersion: $(terraformVersion)
+
+          - bash: terraform fmt -check -recursive -diff
+            displayName: 'terraform fmt -check'
+
+          - bash: |
+              set -euo pipefail
+              for d in modules/* platform/* application; do
+                ls "$d"/*.tf >/dev/null 2>&1 || continue
+                echo "== $d"
+                terraform -chdir="$d" init -backend=false -input=false
+                terraform -chdir="$d" validate
+              done
+            displayName: 'terraform init -backend=false + validate (all modules and roots)'
+
+          - bash: |
+              python3 -m pip install --user checkov
+              ~/.local/bin/checkov -d . --framework terraform \
+                --output cli --output junitxml --output-file-path console,checkov-results \
+                --quiet --compact
+            displayName: 'Checkov security scan'
+            # Remove `continueOnError` to make findings block the PR once the baseline is clean.
+            continueOnError: true
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: 'checkov-results/results_junitxml.xml'
+              testRunTitle: 'Checkov'

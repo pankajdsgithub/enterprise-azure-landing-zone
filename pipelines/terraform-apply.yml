@@ -1,0 +1,68 @@
+# Applies the EXACT plan produced by terraform-plan (artifact), after manual approval.
+# Approvals: Pipelines > Environments > tf-dev | tf-qa | tf-prod > Approvals and checks.
+#   dev: none (auto)   qa: 1 approver   prod: 2 approvers + branch control (main only)
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: plan
+      source: terraform-plan        # name of the pipeline created from terraform-plan.yml
+      trigger:
+        branches:
+          include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: tf-backend
+  - name: terraformVersion
+    value: '1.9.8'
+
+stages:
+  - ${{ each env in split('dev,qa,prod', ',') }}:
+      - stage: Apply_${{ env }}
+        displayName: 'Apply ${{ env }}'
+        ${{ if eq(env, 'qa') }}:
+          dependsOn: Apply_dev
+        ${{ if eq(env, 'prod') }}:
+          dependsOn: Apply_qa
+        variables:
+          - group: tf-platform-${{ env }}
+        jobs:
+          - deployment: apply
+            displayName: 'terraform apply (${{ env }})'
+            environment: tf-${{ env }}          # <- manual approval gate lives here
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - template: templates/terraform-setup.yml
+                      parameters:
+                        terraformVersion: $(terraformVersion)
+
+                    - download: plan
+                      artifact: plan-${{ env }}
+
+                    - template: templates/azure-login-env.yml
+                      parameters:
+                        serviceConnection: sc-tf-${{ env }}
+                        workingDirectory: '$(Pipeline.Workspace)/plan/plan-${{ env }}'
+                        script: |
+                          terraform init -input=false \
+                            -backend-config="resource_group_name=$(TF_STATE_RG)" \
+                            -backend-config="storage_account_name=$(TF_STATE_SA)" \
+                            -backend-config="container_name=tfstate-${{ env }}" \
+                            -backend-config="key=application.tfstate" \
+                            -backend-config="use_azuread_auth=true"
+                          terraform apply -input=false -lock-timeout=10m ${{ env }}.tfplan
+
+                    # Post-deployment validation (read-only)
+                    - template: templates/azure-login-env.yml
+                      parameters:
+                        serviceConnection: sc-tf-${{ env }}
+                        script: |
+                          az group list --query "[?tags.environment=='${{ env }}'].{name:name,state:properties.provisioningState}" -o table
+                          bad=$(az resource list --tag environment=${{ env }} --query "[?provisioningState!='Succeeded'] | length(@)" -o tsv)
+                          echo "Resources not in Succeeded state: $bad"
+                          test "$bad" = "0"

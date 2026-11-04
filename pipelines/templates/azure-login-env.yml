@@ -1,0 +1,29 @@
+# Exposes workload-identity-federation credentials to Terraform as ARM_* environment variables.
+# No client secret exists anywhere: AzureCLI@2 with addSpnToEnvironment hands us a short-lived OIDC token.
+parameters:
+  - name: serviceConnection
+    type: string
+  - name: script
+    type: string
+  - name: workingDirectory
+    type: string
+    default: '$(Build.SourcesDirectory)'
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Terraform (OIDC via ${{ parameters.serviceConnection }})'
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      addSpnToEnvironment: true
+      workingDirectory: ${{ parameters.workingDirectory }}
+      inlineScript: |
+        set -euo pipefail
+        export ARM_USE_OIDC=true
+        export ARM_USE_AZUREAD=true
+        export ARM_CLIENT_ID="$servicePrincipalId"
+        export ARM_OIDC_TOKEN="$idToken"
+        export ARM_TENANT_ID="$tenantId"
+        export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+        ${{ parameters.script }}

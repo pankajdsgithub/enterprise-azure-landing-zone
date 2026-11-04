@@ -1,0 +1,2 @@
+storage_account_name = "sttfstatecinREPLACE"
+allowed_ip_rules     = ["203.0.113.10"] # your public IP

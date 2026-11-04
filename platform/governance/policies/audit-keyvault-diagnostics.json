@@ -1,0 +1,14 @@
+{
+  "if": { "field": "type", "equals": "Microsoft.KeyVault/vaults" },
+  "then": {
+    "effect": "AuditIfNotExists",
+    "details": {
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "existenceCondition": {
+        "allOf": [
+          { "field": "Microsoft.Insights/diagnosticSettings/workspaceId", "exists": "true" }
+        ]
+      }
+    }
+  }
+}

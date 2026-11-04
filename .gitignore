@@ -1,0 +1,23 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*.tfvars.local
+# Real backend / var files (commit only *.example)
+**/backend.hcl
+secrets.auto.tfvars
+# Keep lock files committed
+!.terraform.lock.hcl
+# Misc
+.env
+*.pem
+*.key
+.vscode/
+.DS_Store

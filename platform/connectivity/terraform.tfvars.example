@@ -1,0 +1,3 @@
+location        = "centralindia"
+enable_firewall = false # set true ONLY for the firewall lab, then destroy
+enable_bastion  = false

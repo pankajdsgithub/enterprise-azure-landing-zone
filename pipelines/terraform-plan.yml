@@ -1,0 +1,56 @@
+# Runs on merge to main (and manually). Plans each environment and publishes the plan as an artifact.
+# Prerequisites (one-time, see docs/implementation/phase-14-cicd.md):
+#   * Service connections (Workload identity federation): sc-tf-dev, sc-tf-qa, sc-tf-prod
+#   * Variable group `tf-backend` (non-secret): TF_STATE_RG, TF_STATE_SA
+#   * Variable group `tf-platform-dev|qa|prod` : hub/DNS/LAW IDs as TF_VAR_* (non-secret)
+trigger:
+  branches:
+    include: [main]
+  paths:
+    include: [modules/*, application/*, environments/*]
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: tf-backend
+  - name: terraformVersion
+    value: '1.9.8'
+
+stages:
+  - ${{ each env in split('dev,qa,prod', ',') }}:
+      - stage: Plan_${{ env }}
+        displayName: 'Plan ${{ env }}'
+        ${{ if ne(env, 'dev') }}:
+          dependsOn: []   # plans are independent; apply order is enforced in the apply pipeline
+        variables:
+          - group: tf-platform-${{ env }}
+        jobs:
+          - job: plan
+            steps:
+              - template: templates/terraform-setup.yml
+                parameters:
+                  terraformVersion: $(terraformVersion)
+
+              - template: templates/azure-login-env.yml
+                parameters:
+                  serviceConnection: sc-tf-${{ env }}
+                  script: |
+                    cd application
+                    terraform init -input=false \
+                      -backend-config="resource_group_name=$(TF_STATE_RG)" \
+                      -backend-config="storage_account_name=$(TF_STATE_SA)" \
+                      -backend-config="container_name=tfstate-${{ env }}" \
+                      -backend-config="key=application.tfstate" \
+                      -backend-config="use_azuread_auth=true"
+                    terraform plan -input=false -lock-timeout=5m \
+                      -var-file=../environments/${{ env }}/terraform.tfvars \
+                      -out=${{ env }}.tfplan
+                    terraform show -no-color ${{ env }}.tfplan > ${{ env }}.plan.txt
+
+              - task: PublishPipelineArtifact@1
+                displayName: 'Publish plan artifact'
+                inputs:
+                  targetPath: '$(Build.SourcesDirectory)/application'
+                  artifact: 'plan-${{ env }}'
+                  publishLocation: pipeline

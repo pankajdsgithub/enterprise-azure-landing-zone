@@ -1,0 +1,3 @@
+# pipeline_role_assignments = {
+#   dev-contrib = { scope = "/subscriptions/<GUID>", role = "Contributor" }
+# }
