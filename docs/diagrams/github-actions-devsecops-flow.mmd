@@ -1,0 +1,8 @@
+flowchart LR
+    Dev[Developer Push / PR] --> GH[GitHub Repository]
+    GH --> Val[Validation Jobs]
+    Val --> Sec[Security Scan]
+    Sec --> Plan[Terraform Plan]
+    Plan --> Approval[Manual Approval]
+    Approval --> Apply[Terraform Apply]
+    Apply --> Azure[Azure Landing Zone]

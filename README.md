@@ -28,6 +28,8 @@ terraform init && terraform apply
 Expensive resources (Firewall, Bastion, gateways, ASR, Defender, LB) are **off by default**; see `docs/architecture/cost-optimization.md`.
 
 ## Key documents
+- `docs/architecture/enterprise-azure-greenfield-master-project.md` - executive playbook and implementation source of truth
+- `docs/architecture/implementation-coverage-matrix.md` - repo-grounded implemented vs planned capability matrix
 - `docs/architecture/architecture-guide.md` - step-by-step architecture narrative from requirements to HLD, LLD, and implementation
 - `docs/lld/LLD-enterprise-azure-landing-zone.md` - customer-facing LLD with 8 Mermaid diagrams
 - `docs/implementation/phase-01 … phase-16` - hands-on guide

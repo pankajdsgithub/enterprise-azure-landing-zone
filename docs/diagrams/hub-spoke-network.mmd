@@ -1,0 +1,9 @@
+flowchart LR
+    Internet[Internet] --> FW[Azure Firewall]
+    FW --> Hub[Hub VNet]
+    Hub --> Spoke1[Dev Spoke]
+    Hub --> Spoke2[QA Spoke]
+    Hub --> Spoke3[Prod Spoke]
+    Spoke1 --> App1[Workloads]
+    Spoke2 --> App2[Workloads]
+    Spoke3 --> App3[Workloads]

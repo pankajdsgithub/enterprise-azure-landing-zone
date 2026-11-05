@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant User
+    participant Entra[Microsoft Entra ID]
+    participant RBAC[Azure RBAC]
+    participant Platform[Platform Resources]
+    participant App[Application Resources]
+
+    User->>Entra: authentication
+    Entra->>RBAC: group or role assignment
+    RBAC->>Platform: access grant
+    RBAC->>App: workload access grant
+    Platform-->>User: controlled operations

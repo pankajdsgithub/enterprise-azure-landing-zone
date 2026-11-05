@@ -1,0 +1,9 @@
+flowchart TD
+    Root[Tenant Root] --> Platform[Platform]
+    Root --> LZ[Landing Zones]
+    Root --> Sandbox[Sandbox]
+    Platform --> Connectivity[Connectivity]
+    Platform --> Management[Management]
+    Platform --> Identity[Identity]
+    LZ --> NonProd[Non-Production]
+    LZ --> Prod[Production]

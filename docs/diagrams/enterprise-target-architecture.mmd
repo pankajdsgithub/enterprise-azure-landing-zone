@@ -1,0 +1,11 @@
+flowchart LR
+    User[Users / Admins] --> Portal[Azure Portal]
+    Portal --> MG[Management Group Hierarchy]
+    MG --> Platform[Platform Control Plane]
+    Platform --> Gov[Governance & Policy]
+    Platform --> ID[Identity & RBAC]
+    Platform --> Mon[Monitoring & Logs]
+    Platform --> Net[Hub Network]
+    Net --> Spoke[Workload Spokes]
+    Spoke --> App[Application Services]
+    App --> DB[Data Services]

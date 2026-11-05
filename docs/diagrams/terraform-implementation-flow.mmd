@@ -1,0 +1,8 @@
+flowchart TD
+    Discover[Discovery & Prereqs] --> Bootstrap[Bootstrap State]
+    Bootstrap --> Governance[Management Groups & Policy]
+    Governance --> Identity[Identity & RBAC]
+    Identity --> Network[Hub-Spoke Network]
+    Network --> Monitor[Monitoring]
+    Monitor --> App[Application Resources]
+    App --> Validate[Validation & Handover]
